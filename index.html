@@ -1,0 +1,2094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>For You ♡</title>
+
+    <style>
+        /* =========================================================
+           COLORS
+        ========================================================= */
+
+        :root {
+            --white: #fffdfb;
+            --ivory: #fffaf7;
+            --blush: #f8e8e9;
+            --soft-pink: #eec8cd;
+            --rose: #c85d76;
+            --burgundy: #7b2943;
+            --dark: #542036;
+            --text: #765561;
+            --light-text: #aa8791;
+            --gold: #d5b17a;
+            --green: #9caf91;
+        }
+
+
+        /* =========================================================
+           BASIC
+        ========================================================= */
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: Georgia, "Times New Roman", serif;
+            background: var(--white);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        button,
+        input {
+            font-family: inherit;
+        }
+
+
+        /* =========================================================
+           OPENING SCREEN
+        ========================================================= */
+
+        #opening {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            background:
+                radial-gradient(circle at 20% 20%, #fff5f4 0%, transparent 30%),
+                radial-gradient(circle at 80% 80%, #fdf0f1 0%, transparent 30%),
+                var(--white);
+
+            transition:
+                opacity 0.8s ease,
+                visibility 0.8s ease;
+        }
+
+        #opening.hide {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .opening-content {
+            width: min(90%, 600px);
+            text-align: center;
+            position: relative;
+            z-index: 5;
+
+            animation: openingAppear 1.2s ease forwards;
+        }
+
+        @keyframes openingAppear {
+            from {
+                opacity: 0;
+                transform: translateY(25px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .small-intro {
+            color: var(--light-text);
+            font-size: 0.9rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+
+        .opening-title {
+            color: var(--burgundy);
+            font-size: clamp(2.2rem, 7vw, 4rem);
+            font-weight: normal;
+            line-height: 1.15;
+            margin-bottom: 35px;
+        }
+
+        .opening-title span {
+            display: inline-block;
+            color: var(--rose);
+            animation: heartBeat 2s infinite ease-in-out;
+        }
+
+        @keyframes heartBeat {
+            0%, 100% {
+                transform: scale(1);
+            }
+
+            10% {
+                transform: scale(1.15);
+            }
+
+            20% {
+                transform: scale(1);
+            }
+
+            30% {
+                transform: scale(1.12);
+            }
+
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        .answer-box {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        #answer {
+            width: min(280px, 75vw);
+            padding: 15px 20px;
+
+            border: 1px solid var(--soft-pink);
+            border-radius: 30px;
+
+            outline: none;
+            background: rgba(255,255,255,0.8);
+
+            color: var(--dark);
+            font-size: 1rem;
+
+            text-align: center;
+
+            transition: 0.3s ease;
+        }
+
+        #answer:focus {
+            border-color: var(--rose);
+            box-shadow: 0 0 0 4px rgba(200,93,118,0.08);
+        }
+
+        #enterBtn {
+            border: none;
+            border-radius: 30px;
+
+            padding: 15px 25px;
+
+            background: var(--burgundy);
+            color: white;
+
+            cursor: pointer;
+            font-size: 0.95rem;
+
+            transition: 0.3s ease;
+        }
+
+        #enterBtn:hover {
+            background: var(--dark);
+            transform: translateY(-2px);
+        }
+
+        #wrong {
+            margin-top: 15px;
+            color: var(--rose);
+            min-height: 20px;
+            font-size: 0.9rem;
+        }
+
+
+        /* =========================================================
+           OPENING FLOWERS
+        ========================================================= */
+
+        .opening-flower {
+            position: absolute;
+            width: 145px;
+            height: 220px;
+
+            pointer-events: none;
+            opacity: 0.95;
+        }
+
+        .opening-flower.left {
+            left: 0;
+            bottom: 20px;
+        }
+
+        .opening-flower.right {
+            right: 0;
+            top: 20px;
+            transform: scaleX(-1);
+        }
+
+        .flower-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        @media (max-width: 600px) {
+            .opening-flower {
+                width: 95px;
+                height: 155px;
+            }
+
+            .opening-flower.left {
+                left: -10px;
+                bottom: 10px;
+            }
+
+            .opening-flower.right {
+                right: -10px;
+                top: 10px;
+            }
+        }
+
+
+        /* =========================================================
+           REVEAL ANIMATION
+           This is the full-screen effect that plays right after
+           you answer the opening question correctly. It's a big
+           burst of hearts flying out from the center of the
+           screen — the "explosion". The particles themselves
+           (.reveal-heart-particle) are created in JS, one per
+           heart; this CSS just says how each one animates once
+           it exists (see triggerRevealHearts() in the script).
+        ========================================================= */
+
+        #revealAnimation {
+            position: fixed;
+            inset: 0;
+            z-index: 1100;
+
+            background: var(--white);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            pointer-events: none;
+
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        #revealAnimation.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* The single big heart that flashes in the center first,
+           then grows and fades — plays underneath the burst of
+           smaller hearts for extra punch. */
+        .reveal-center-heart {
+            position: absolute;
+            color: var(--rose);
+            font-size: clamp(6rem, 22vw, 10rem);
+            z-index: 10;
+
+            animation: heartPop 1.5s ease-out forwards;
+        }
+
+        @keyframes heartPop {
+            0% {
+                transform: scale(0.1);
+                opacity: 0;
+            }
+
+            20% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+
+            45% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(2.5);
+                opacity: 0;
+            }
+        }
+
+        /* Each individual heart in the burst. --x / --y (how far
+           it flies) and --size (how big it is) are set inline by
+           JS so every heart gets its own random direction, distance,
+           and size. */
+        .reveal-heart-particle {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+
+            color: var(--rose);
+            font-size: var(--size);
+
+            animation: heartExplode 1.5s ease-out forwards;
+        }
+
+        /* Flight path for one burst heart: start tiny right at
+           the center, fly out to its own (--x, --y) offset while
+           spinning (--rotation) and fading out. */
+        @keyframes heartExplode {
+            0% {
+                transform:
+                    translate(-50%, -50%)
+                    scale(0.2)
+                    rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform:
+                    translate(
+                        calc(-50% + var(--x)),
+                        calc(-50% + var(--y))
+                    )
+                    scale(1)
+                    rotate(var(--rotation));
+                opacity: 0;
+            }
+        }
+
+
+        /* =========================================================
+           MAIN WEBSITE
+        ========================================================= */
+
+        #website {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease;
+        }
+
+        #website.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+
+        /* =========================================================
+           NAVIGATION
+        ========================================================= */
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+
+            display: flex;
+            justify-content: center;
+            gap: 28px;
+
+            padding: 16px 20px;
+
+            background: rgba(255,253,251,0.9);
+            backdrop-filter: blur(12px);
+
+            border-bottom: 1px solid #f5e7e8;
+        }
+
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            font-size: 0.82rem;
+            letter-spacing: 1px;
+
+            transition: color 0.25s ease;
+        }
+
+        nav a:hover {
+            color: var(--rose);
+        }
+
+
+        /* =========================================================
+           GENERAL SECTIONS
+        ========================================================= */
+
+        section {
+            position: relative;
+        }
+
+        .section {
+            width: min(900px, 90%);
+            margin: auto;
+            padding: 100px 0;
+        }
+
+        .section-heading {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .eyebrow {
+            color: var(--rose);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 0.75rem;
+            margin-bottom: 12px;
+        }
+
+        .section-heading h2 {
+            color: var(--burgundy);
+            font-size: clamp(2rem, 6vw, 3rem);
+            font-weight: normal;
+        }
+
+        .section-heading p {
+            margin-top: 15px;
+            color: var(--light-text);
+            font-family: Arial, sans-serif;
+            font-size: 0.9rem;
+        }
+
+
+        /* =========================================================
+           HERO
+        ========================================================= */
+
+        .hero {
+            min-height: 90vh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            text-align: center;
+
+            background:
+                radial-gradient(circle at 10% 30%, #fff3f3, transparent 25%),
+                radial-gradient(circle at 90% 70%, #fdf0f1, transparent 25%),
+                var(--white);
+
+            overflow: hidden;
+        }
+
+        .hero-content {
+            width: min(700px, 90%);
+            position: relative;
+            z-index: 3;
+
+            animation: heroUp 1.2s ease forwards;
+        }
+
+        @keyframes heroUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-heart {
+            font-size: 7rem;
+            color: var(--rose);
+
+            display: inline-block;
+
+            filter: drop-shadow(0 10px 20px rgba(150,50,70,0.12));
+
+            animation:
+                floatHeart 4s ease-in-out infinite,
+                heartBeat 2.5s ease-in-out infinite;
+        }
+
+        @keyframes floatHeart {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-12px);
+            }
+        }
+
+        .hero h1 {
+            margin-top: 25px;
+
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            font-weight: normal;
+
+            color: var(--burgundy);
+        }
+
+        .hero h1 span {
+            color: var(--rose);
+        }
+
+        .hero p {
+            margin: 25px auto 0;
+            max-width: 550px;
+
+            font-family: Arial, sans-serif;
+            line-height: 1.8;
+
+            color: var(--text);
+        }
+
+        .scroll-hint {
+            margin-top: 55px;
+
+            color: var(--light-text);
+            font-family: Arial, sans-serif;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(8px);
+            }
+        }
+
+
+        /* =========================================================
+           FLOATING HEARTS
+           These are the little hearts that drift up the screen
+           in the background once the site is unlocked. Each one
+           is a <div> created in JS (see createHeart() below) and
+           this class just controls how it looks and animates.
+           Font-size (i.e. how big each heart is) is set inline
+           by JS, not here, so look in the <script> to resize them.
+        ========================================================= */
+
+        .floating-heart {
+            position: fixed;
+
+            bottom: -30px; /* starts just below the visible screen */
+
+            color: var(--rose);
+            opacity: 0;
+
+            pointer-events: none; /* so it never blocks clicks */
+            z-index: 2;
+
+            animation: floatUp linear forwards;
+        }
+
+        /* The path a floating heart takes: fade in, drift straight
+           up the full height of the screen, fade back out. */
+        @keyframes floatUp {
+            0% {
+                opacity: 0;
+                transform: translateY(0) rotate(0deg);
+            }
+
+            10% {
+                opacity: 0.55;
+            }
+
+            90% {
+                opacity: 0.2;
+            }
+
+            100% {
+                opacity: 0;
+                transform:
+                    translateY(-110vh)
+                    rotate(25deg);
+            }
+        }
+
+
+        /* =========================================================
+           PHOTOS - ONE PER ROW
+        ========================================================= */
+
+        #memories {
+            background: var(--ivory);
+        }
+
+        .photo-list {
+            width: min(460px, 100%);
+            margin: auto;
+
+            display: flex;
+            flex-direction: column;
+            gap: 55px;
+        }
+
+        .photo-card {
+            background: white;
+
+            padding: 14px 14px 24px;
+
+            box-shadow:
+                0 15px 40px rgba(100,50,60,0.08);
+
+            transform: translateY(40px);
+            opacity: 0;
+
+            transition:
+                opacity 0.9s ease,
+                transform 0.9s ease;
+
+            position: relative;
+        }
+
+        .photo-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .photo-card:nth-child(even) {
+            transform: translateY(40px) rotate(1deg);
+        }
+
+        .photo-card:nth-child(odd) {
+            transform: translateY(40px) rotate(-1deg);
+        }
+
+        .photo-card.visible:nth-child(even) {
+            transform: translateY(0) rotate(1deg);
+        }
+
+        .photo-card.visible:nth-child(odd) {
+            transform: translateY(0) rotate(-1deg);
+        }
+
+        .photo-card img {
+            display: block;
+
+            width: 100%;
+            height: auto;
+
+            aspect-ratio: 4 / 5;
+            object-fit: cover;
+
+            background: #f8eeee;
+        }
+
+        .photo-caption {
+            text-align: center;
+            padding-top: 20px;
+
+            color: var(--burgundy);
+            font-size: 1.05rem;
+        }
+
+        .photo-number {
+            position: absolute;
+
+            top: -14px;
+            right: -10px;
+
+            width: 34px;
+            height: 34px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 50%;
+
+            background: var(--burgundy);
+            color: white;
+
+            font-family: Arial, sans-serif;
+            font-size: 0.7rem;
+        }
+
+
+        /* =========================================================
+           ENVELOPE SECTION
+        ========================================================= */
+
+        #something {
+            background: var(--white);
+            text-align: center;
+        }
+
+        .envelope-wrapper {
+            margin: 70px auto 0;
+
+            width: min(360px, 85vw);
+            cursor: pointer;
+        }
+
+        .envelope {
+            position: relative;
+
+            width: 100%;
+            aspect-ratio: 1.5 / 1;
+
+            background: #f5dfe1;
+
+            border-radius: 4px;
+
+            box-shadow:
+                0 20px 45px rgba(90,30,45,0.12);
+
+            overflow: hidden;
+
+            transition: transform 0.4s ease;
+        }
+
+        .envelope-wrapper:hover .envelope {
+            transform: translateY(-7px);
+        }
+
+        .envelope-body {
+            position: absolute;
+            inset: 0;
+
+            background: #f4d9dc;
+        }
+
+        .envelope-body::before,
+        .envelope-body::after {
+            content: "";
+
+            position: absolute;
+
+            bottom: 0;
+
+            width: 0;
+            height: 0;
+
+            border-style: solid;
+        }
+
+        .envelope-body::before {
+            left: 0;
+
+            border-width: 0 0 100% 100%;
+            border-color: transparent transparent #efd0d4 transparent;
+        }
+
+        .envelope-body::after {
+            right: 0;
+
+            border-width: 100% 0 0 100%;
+            border-color: transparent transparent transparent #e9c8cc;
+        }
+
+        .envelope-flap {
+            position: absolute;
+
+            top: 0;
+            left: 0;
+
+            width: 100%;
+            height: 65%;
+
+            background: #f8e5e6;
+
+            clip-path: polygon(
+                0 0,
+                100% 0,
+                50% 100%
+            );
+
+            transform-origin: top;
+            transition: transform 0.9s cubic-bezier(.68,-0.55,.27,1.55);
+
+            z-index: 5;
+        }
+
+        .envelope-heart {
+            position: absolute;
+
+            top: 43%;
+            left: 50%;
+
+            transform: translate(-50%, -50%);
+
+            font-size: 2.2rem;
+
+            color: var(--burgundy);
+
+            z-index: 6;
+
+            transition: opacity 0.4s ease;
+        }
+
+        .envelope-wrapper.open .envelope-flap {
+            transform: rotateX(180deg);
+        }
+
+        .envelope-wrapper.open .envelope-heart {
+            opacity: 0;
+        }
+
+        .envelope-message {
+            max-height: 0;
+            overflow: hidden;
+
+            opacity: 0;
+
+            transition:
+                max-height 1s ease,
+                opacity 0.8s ease,
+                margin 0.8s ease;
+        }
+
+        .envelope-wrapper.open + .envelope-message {
+            max-height: 300px;
+            opacity: 1;
+            margin-top: 40px;
+        }
+
+        .envelope-message p {
+            font-size: 1.2rem;
+            line-height: 1.9;
+
+            color: var(--burgundy);
+        }
+
+        .tap-text {
+            margin-top: 25px;
+
+            color: var(--light-text);
+            font-family: Arial, sans-serif;
+            font-size: 0.8rem;
+        }
+
+
+        /* =========================================================
+           FINAL I LOVE YOU
+        ========================================================= */
+
+        #final {
+            min-height: 100vh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            text-align: center;
+
+            background:
+                radial-gradient(circle at center, #fff4f4, var(--white) 65%);
+
+            overflow: hidden;
+        }
+
+        .final-content {
+            width: min(700px, 90%);
+            position: relative;
+            z-index: 5;
+        }
+
+        .final-small {
+            color: var(--rose);
+
+            font-family: Arial, sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-size: 0.75rem;
+
+            margin-bottom: 20px;
+        }
+
+        .final-heart {
+            font-size: 6rem;
+            color: var(--rose);
+
+            display: inline-block;
+
+            animation: finalHeart 2.5s ease-in-out infinite;
+        }
+
+        @keyframes finalHeart {
+            0%, 100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.12);
+            }
+        }
+
+        .final h2 {
+            font-size: clamp(3rem, 12vw, 6.5rem);
+            font-weight: normal;
+
+            color: var(--burgundy);
+
+            line-height: 1;
+        }
+
+        .final h2 span {
+            color: var(--rose);
+        }
+
+        .final p {
+            margin: 30px auto 0;
+
+            max-width: 500px;
+
+            font-size: 1.1rem;
+            line-height: 1.9;
+        }
+
+        #oneMore {
+            margin-top: 40px;
+
+            border: 1px solid var(--soft-pink);
+            background: white;
+
+            color: var(--burgundy);
+
+            padding: 14px 25px;
+
+            border-radius: 30px;
+
+            cursor: pointer;
+
+            transition: 0.3s ease;
+        }
+
+        #oneMore:hover {
+            background: var(--blush);
+            transform: translateY(-3px);
+        }
+
+        #secret {
+            max-height: 0;
+            overflow: hidden;
+
+            opacity: 0;
+
+            transition:
+                max-height 1s ease,
+                opacity 0.8s ease,
+                margin 0.8s ease;
+        }
+
+        #secret.show {
+            max-height: 250px;
+            opacity: 1;
+            margin-top: 35px;
+        }
+
+        #secret p {
+            color: var(--rose);
+            font-size: 1.2rem;
+        }
+
+
+        /* =========================================================
+           FINAL FLOWERS
+        ========================================================= */
+
+        .final-flower {
+            position: absolute;
+
+            width: 180px;
+            height: 270px;
+
+            pointer-events: none;
+
+            opacity: 0.9;
+
+            z-index: 1;
+        }
+
+        .final-flower.left {
+            left: 0;
+            bottom: 0;
+        }
+
+        .final-flower.right {
+            right: 0;
+            top: 0;
+
+            transform: scaleX(-1);
+        }
+
+        @media (max-width: 600px) {
+            .final-flower {
+                width: 105px;
+                height: 170px;
+            }
+        }
+
+
+        /* =========================================================
+           HEART EXPLOSION
+           NOTE: the burst hearts are no longer animated with a CSS
+           @keyframes rule. They're animated directly in JS using
+           element.animate() (the Web Animations API) — see
+           createHeartExplosion() in the <script> below. That gave
+           a cleaner, more reliable "explosion from the button"
+           effect, so this class now only sets the non-animated
+           basics (hearts get their position/size set inline by JS).
+        ========================================================= */
+
+        .burst-heart {
+            position: fixed;
+            z-index: 999;
+            color: var(--rose);
+            pointer-events: none;
+        }
+
+
+        /* =========================================================
+           FOOTER
+        ========================================================= */
+
+        footer {
+            text-align: center;
+
+            padding: 40px 20px;
+
+            color: var(--light-text);
+
+            font-family: Arial, sans-serif;
+            font-size: 0.75rem;
+        }
+
+
+        /* =========================================================
+           MOBILE
+        ========================================================= */
+
+        @media (max-width: 650px) {
+
+            nav {
+                gap: 16px;
+            }
+
+            nav a {
+                font-size: 0.7rem;
+            }
+
+            .section {
+                padding: 75px 0;
+            }
+
+            .hero {
+                min-height: 85vh;
+            }
+
+            .hero-heart {
+                font-size: 5rem;
+            }
+
+            .photo-list {
+                gap: 45px;
+            }
+
+            .photo-card {
+                padding: 10px 10px 20px;
+            }
+
+            .final h2 {
+                font-size: 4rem;
+            }
+        }
+    </style>
+</head>
+
+
+<body>
+
+
+<!-- ============================================================
+     OPENING QUESTION
+============================================================= -->
+
+<div id="opening">
+
+    <!-- LEFT FLOWER -->
+    <div class="opening-flower left">
+        <svg class="flower-svg" viewBox="0 0 145 220">
+            <path
+                d="M72 220 C70 165 76 105 69 57"
+                fill="none"
+                stroke="#9caf91"
+                stroke-width="4"
+                stroke-linecap="round"
+            />
+
+            <path
+                d="M72 160 C45 145 30 150 20 137 C43 132 60 137 72 150"
+                fill="#a9bb9e"
+            />
+
+            <path
+                d="M70 125 C92 111 110 116 120 103 C96 99 80 105 70 115"
+                fill="#a9bb9e"
+            />
+
+            <path
+                d="M70 185 C48 174 34 180 25 168 C46 165 61 170 70 178"
+                fill="#a9bb9e"
+            />
+
+            <g transform="translate(35 20)">
+                <ellipse cx="37" cy="10" rx="17" ry="24" fill="white" stroke="#eee3e2"/>
+                <ellipse cx="15" cy="32" rx="17" ry="24" transform="rotate(-65 15 32)" fill="white" stroke="#eee3e2"/>
+                <ellipse cx="59" cy="32" rx="17" ry="24" transform="rotate(65 59 32)" fill="white" stroke="#eee3e2"/>
+                <ellipse cx="37" cy="53" rx="17" ry="24" transform="rotate(180 37 53)" fill="white" stroke="#eee3e2"/>
+                <circle cx="37" cy="32" r="10" fill="#d7b37e"/>
+            </g>
+        </svg>
+    </div>
+
+
+    <!-- RIGHT FLOWER -->
+    <div class="opening-flower right">
+        <svg class="flower-svg" viewBox="0 0 145 220">
+            <path
+                d="M72 220 C70 165 76 105 69 57"
+                fill="none"
+                stroke="#9caf91"
+                stroke-width="4"
+                stroke-linecap="round"
+            />
+
+            <path
+                d="M72 160 C45 145 30 150 20 137 C43 132 60 137 72 150"
+                fill="#a9bb9e"
+            />
+
+            <path
+                d="M70 125 C92 111 110 116 120 103 C96 99 80 105 70 115"
+                fill="#a9bb9e"
+            />
+
+            <path
+                d="M70 185 C48 174 34 180 25 168 C46 165 61 170 70 178"
+                fill="#a9bb9e"
+            />
+
+            <g transform="translate(35 20)">
+                <ellipse cx="37" cy="10" rx="17" ry="24" fill="white" stroke="#eee3e2"/>
+                <ellipse cx="15" cy="32" rx="17" ry="24" transform="rotate(-65 15 32)" fill="white" stroke="#eee3e2"/>
+                <ellipse cx="59" cy="32" rx="17" ry="24" transform="rotate(65 59 32)" fill="white" stroke="#eee3e2"/>
+                <ellipse cx="37" cy="53" rx="17" ry="24" transform="rotate(180 37 53)" fill="white" stroke="#eee3e2"/>
+                <circle cx="37" cy="32" r="10" fill="#d7b37e"/>
+            </g>
+        </svg>
+    </div>
+
+
+    <div class="opening-content">
+
+        <div class="small-intro">
+            Surpriseeee!!!! A little question...
+        </div>
+
+        <h1 class="opening-title">
+            Who loves you the most? <span>♡</span>
+        </h1>
+
+        <div class="answer-box">
+            <input
+                id="answer"
+                type="text"
+                placeholder="Answer..."
+                autocomplete="off"
+            >
+
+            <button id="enterBtn">
+                Enter ♡
+            </button>
+        </div>
+
+        <div id="wrong"></div>
+
+    </div>
+</div>
+
+
+
+<!-- ============================================================
+     REVEAL ANIMATION
+============================================================= -->
+
+<div id="revealAnimation">
+
+    <!-- The center heart flash. The smaller hearts that burst
+         outward are added here dynamically by JS — see
+         triggerRevealHearts() in the script at the bottom. -->
+    <div class="reveal-center-heart">♥</div>
+
+</div>
+
+
+
+<!-- ============================================================
+     MAIN WEBSITE
+============================================================= -->
+
+<div id="website">
+
+
+    <!-- NAVIGATION -->
+
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#memories">Memories</a>
+        <a href="#something">For You</a>
+        <a href="#final">♡</a>
+    </nav>
+
+
+
+    <!-- ========================================================
+         HERO
+    ========================================================= -->
+
+    <section class="hero" id="home">
+
+        <div class="hero-content">
+
+            <div class="hero-heart">
+                ♥
+            </div>
+
+            <h1>
+                Happy 5 Months,
+                <span>My Love</span> ♡
+            </h1>
+
+            <p>
+                Five months of memories, laughs, little moments,
+                and so many reasons to love you.
+            </p>
+
+            <div class="scroll-hint">
+                AAAAND TO MANY MOOOOREEE, Keep scrolling ↓
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ========================================================
+         MEMORIES
+    ========================================================= -->
+
+    <section class="section" id="memories">
+
+        <div class="section-heading">
+
+            <div class="eyebrow">
+                Our memories
+            </div>
+
+            <h2>
+                A few of my favourite moments ♡
+            </h2>
+
+            <p>
+                And hopefully just the beginning.
+            </p>
+
+        </div>
+
+
+        <div class="photo-list">
+
+
+            <!-- PHOTO 1 -->
+
+            <div class="photo-card">
+
+                <div class="photo-number">
+                    01
+                </div>
+
+                <img src="photo1.jpg" alt="Our memory">
+
+                <div class="photo-caption">
+                    Where it all began ♡
+                </div>
+
+            </div>
+
+
+
+            <!-- PHOTO 2 -->
+
+            <div class="photo-card">
+
+                <div class="photo-number">
+                    02
+                </div>
+
+                <img src="photo2.jpg" alt="Our memory">
+
+                <div class="photo-caption">
+                    To my biggest supporter ever!!
+                </div>
+
+            </div>
+
+
+
+            <!-- PHOTO 3 -->
+
+            <div class="photo-card">
+
+                <div class="photo-number">
+                    03
+                </div>
+
+                <img src="photo3.jpg" alt="Our memory">
+
+                <div class="photo-caption">
+                    You silly goooooseee
+                </div>
+
+            </div>
+
+
+
+            <!-- PHOTO 4 -->
+
+            <div class="photo-card">
+
+                <div class="photo-number">
+                    04
+                </div>
+
+                <img src="photo4.jpg" alt="Our memory">
+
+                <div class="photo-caption">
+                    I lovee thiiisssss ♡
+                </div>
+
+            </div>
+
+
+
+            <!-- PHOTO 5 -->
+
+            <div class="photo-card">
+
+                <div class="photo-number">
+                    05
+                </div>
+
+                <img src="photo5.jpg" alt="Our memory">
+
+                <div class="photo-caption">
+                    To more hikes together (where I don't die).
+                </div>
+
+            </div>
+
+
+
+            <!-- PHOTO 6 -->
+
+            <div class="photo-card">
+
+                <div class="photo-number">
+                    06
+                </div>
+
+                <img src="photo6.jpg" alt="Our memory">
+
+                <div class="photo-caption">
+                    I love this girl so much ♡
+                    <br>(and to many more celebrations together)
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ========================================================
+         LITTLE SOMETHING FOR YOU
+    ========================================================= -->
+
+    <section class="section" id="something">
+
+        <div class="section-heading">
+
+            <div class="eyebrow">
+                Just for you
+            </div>
+
+            <h2>
+                A Little Something For You ♡
+            </h2>
+
+            <p>
+                I wanted to leave you one little surprise.
+            </p>
+
+        </div>
+
+
+        <div
+            class="envelope-wrapper"
+            id="envelope"
+        >
+
+            <div class="envelope">
+
+                <div class="envelope-body"></div>
+
+                <div class="envelope-flap"></div>
+
+                <div class="envelope-heart">
+                    ♥
+                </div>
+
+            </div>
+
+            <div class="tap-text">
+                Tap the envelope ♡
+            </div>
+
+        </div>
+
+
+        <div class="envelope-message" id="envelopeMessage">
+
+            <p>
+                I hope you know how happy you make me.
+                <br>
+                I’m really lucky to have you, my silly goose. ♡
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- ========================================================
+         FINAL
+    ========================================================= -->
+
+    <section id="final" class="final">
+
+
+        <!-- LEFT FLOWER -->
+
+        <div class="final-flower left">
+
+            <svg class="flower-svg" viewBox="0 0 145 220">
+
+                <path
+                    d="M72 220 C70 165 76 105 69 57"
+                    fill="none"
+                    stroke="#9caf91"
+                    stroke-width="4"
+                    stroke-linecap="round"
+                />
+
+                <path
+                    d="M72 160 C45 145 30 150 20 137 C43 132 60 137 72 150"
+                    fill="#a9bb9e"
+                />
+
+                <path
+                    d="M70 125 C92 111 110 116 120 103 C96 99 80 105 70 115"
+                    fill="#a9bb9e"
+                />
+
+                <path
+                    d="M70 185 C48 174 34 180 25 168 C46 165 61 170 70 178"
+                    fill="#a9bb9e"
+                />
+
+                <g transform="translate(35 20)">
+                    <ellipse cx="37" cy="10" rx="17" ry="24" fill="white" stroke="#eee3e2"/>
+                    <ellipse cx="15" cy="32" rx="17" ry="24" transform="rotate(-65 15 32)" fill="white" stroke="#eee3e2"/>
+                    <ellipse cx="59" cy="32" rx="17" ry="24" transform="rotate(65 59 32)" fill="white" stroke="#eee3e2"/>
+                    <ellipse cx="37" cy="53" rx="17" ry="24" transform="rotate(180 37 53)" fill="white" stroke="#eee3e2"/>
+                    <circle cx="37" cy="32" r="10" fill="#d7b37e"/>
+                </g>
+
+            </svg>
+
+        </div>
+
+
+
+        <!-- RIGHT FLOWER -->
+
+        <div class="final-flower right">
+
+            <svg class="flower-svg" viewBox="0 0 145 220">
+
+                <path
+                    d="M72 220 C70 165 76 105 69 57"
+                    fill="none"
+                    stroke="#9caf91"
+                    stroke-width="4"
+                    stroke-linecap="round"
+                />
+
+                <path
+                    d="M72 160 C45 145 30 150 20 137 C43 132 60 137 72 150"
+                    fill="#a9bb9e"
+                />
+
+                <path
+                    d="M70 125 C92 111 110 116 120 103 C96 99 80 105 70 115"
+                    fill="#a9bb9e"
+                />
+
+                <path
+                    d="M70 185 C48 174 34 180 25 168 C46 165 61 170 70 178"
+                    fill="#a9bb9e"
+                />
+
+                <g transform="translate(35 20)">
+                    <ellipse cx="37" cy="10" rx="17" ry="24" fill="white" stroke="#eee3e2"/>
+                    <ellipse cx="15" cy="32" rx="17" ry="24" transform="rotate(-65 15 32)" fill="white" stroke="#eee3e2"/>
+                    <ellipse cx="59" cy="32" rx="17" ry="24" transform="rotate(65 59 32)" fill="white" stroke="#eee3e2"/>
+                    <ellipse cx="37" cy="53" rx="17" ry="24" transform="rotate(180 37 53)" fill="white" stroke="#eee3e2"/>
+                    <circle cx="37" cy="32" r="10" fill="#d7b37e"/>
+                </g>
+
+            </svg>
+
+        </div>
+
+
+
+        <div class="final-content">
+
+            <div class="final-small">
+                One more thing...
+            </div>
+
+            <div class="final-heart">
+                ♥
+            </div>
+
+            <h2>
+                I Love <span>You</span>
+            </h2>
+
+            <p>
+                Happy 5 months, my love.
+                <br><br>
+                I can't wait to see all the memories
+                we still have ahead of us. ♡
+            </p>
+
+            <button id="oneMore">
+                One more thing... ♡
+            </button>
+
+            <div id="secret">
+
+                <p>
+                    You’re my favourite person. Always. ❤️
+                </p>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <footer>
+        Made with love ♡
+    </footer>
+
+
+</div>
+
+
+
+<script>
+
+    /* =========================================================
+       OPENING ANSWER
+    ========================================================= */
+
+    const opening = document.getElementById("opening");
+    const website = document.getElementById("website");
+    const answer = document.getElementById("answer");
+    const enterBtn = document.getElementById("enterBtn");
+    const wrong = document.getElementById("wrong");
+    const revealAnimation = document.getElementById("revealAnimation");
+
+
+    const correctAnswer = "hazem";
+
+
+    function checkAnswer() {
+
+        const userAnswer =
+            answer.value.trim().toLowerCase();
+
+        if (userAnswer === correctAnswer) {
+
+            wrong.textContent = "";
+
+            /*
+                Show the reveal overlay, then spawn a big burst
+                of hearts flying out from the center of the
+                screen (this is the actual "explosion").
+            */
+
+            revealAnimation.classList.add("active");
+
+            triggerRevealHearts();
+
+
+            /*
+                After the animation has started,
+                hide the question and reveal the website.
+            */
+
+            setTimeout(() => {
+
+                opening.classList.add("hide");
+
+                website.classList.add("show");
+
+                window.scrollTo({
+                    top: 0,
+                    behavior: "instant"
+                });
+
+                startHearts();
+
+            }, 1000);
+
+
+            /*
+                Remove the animation overlay.
+            */
+
+            setTimeout(() => {
+
+                revealAnimation.classList.remove("active");
+
+            }, 1600);
+
+
+        } else {
+
+            wrong.textContent =
+                "Do you need medicine? ♡";
+
+            answer.classList.add("shake");
+
+            setTimeout(() => {
+                answer.classList.remove("shake");
+            }, 400);
+
+        }
+    }
+
+
+    enterBtn.addEventListener(
+        "click",
+        checkAnswer
+    );
+
+
+    /* =========================================================
+       REVEAL HEART BURST
+       Spawns a big burst of hearts flying outward from the
+       center of the screen — this is what plays right after
+       you answer the opening question correctly. Each heart is
+       its own <span> with .reveal-heart-particle, animated by
+       the "heartExplode" CSS keyframes (see the <style> above).
+    ========================================================= */
+
+    function triggerRevealHearts() {
+
+        // HOW MANY HEARTS in the burst.
+        const heartCount = 55;
+
+        for (
+            let i = 0;
+            i < heartCount;
+            i++
+        ) {
+
+            const heart =
+                document.createElement("span");
+
+            heart.className =
+                "reveal-heart-particle";
+
+            heart.textContent =
+                Math.random() > 0.4
+                    ? "♥"
+                    : "♡";
+
+            // Random direction for this heart to fly off in.
+            const angle =
+                Math.random() * Math.PI * 2;
+
+            // How far this heart travels from the center.
+            const distance =
+                160 + Math.random() * 460;
+
+            const x =
+                Math.cos(angle) * distance;
+
+            const y =
+                Math.sin(angle) * distance;
+
+            // HEART SIZE: roughly 42–98px, so the burst actually
+            // reads as big hearts filling the screen rather than
+            // small confetti. Adjust BASE / RANGE to resize.
+            const size =
+                42 + Math.random() * 56;
+
+            // Random spin as it flies outward.
+            const rotation =
+                (Math.random() - 0.5) * 500;
+
+            heart.style.setProperty("--x", x + "px");
+            heart.style.setProperty("--y", y + "px");
+            heart.style.setProperty("--size", size + "px");
+            heart.style.setProperty("--rotation", rotation + "deg");
+
+            // Tiny random delay so hearts don't all launch in
+            // perfect unison — makes the burst feel more natural.
+            heart.style.animationDelay =
+                Math.random() * 0.12 + "s";
+
+            revealAnimation.appendChild(heart);
+
+            // Clean up this heart once its flight has finished.
+            setTimeout(() => {
+
+                heart.remove();
+
+            }, 1700);
+
+        }
+
+    }
+
+
+    answer.addEventListener(
+        "keydown",
+        function(event) {
+
+            if (event.key === "Enter") {
+                checkAnswer();
+            }
+
+        }
+    );
+
+
+
+    /* =========================================================
+       FLOATING HEARTS
+       Spawns one heart at a time that drifts up from a random
+       spot along the bottom of the screen. startHearts() below
+       just calls this on a repeating timer.
+    ========================================================= */
+
+    function createHeart() {
+
+        // Make a new empty <div> and turn it into a heart
+        // by giving it the .floating-heart class (styled in CSS).
+        const heart =
+            document.createElement("div");
+
+        heart.className =
+            "floating-heart";
+
+        // Randomly pick an outline heart (♡) or a filled one (♥).
+        heart.textContent =
+            Math.random() > 0.5
+                ? "♡"
+                : "♥";
+
+        // Random horizontal starting position across the screen.
+        heart.style.left =
+            Math.random() * 100 + "vw";
+
+        // HEART SIZE (main page): was 12–30px, now bigger at
+        // roughly 22–52px. Change the two numbers below to
+        // resize: (BASE + Math.random() * RANGE).
+        heart.style.fontSize =
+            (22 + Math.random() * 30) + "px";
+
+        // How long this heart takes to float from bottom to top.
+        const duration =
+            7 + Math.random() * 7;
+
+        heart.style.animationDuration =
+            duration + "s";
+
+        document.body.appendChild(heart);
+
+        // Clean up: remove the heart from the page once its
+        // animation has finished, so we don't pile up hidden
+        // elements forever.
+        setTimeout(() => {
+
+            heart.remove();
+
+        }, duration * 1000);
+
+    }
+
+
+    // Kicks off the background hearts once the site unlocks —
+    // spawns a new one every 1.2 seconds, forever.
+    function startHearts() {
+
+        setInterval(
+            createHeart,
+            1200
+        );
+
+    }
+
+
+
+    /* =========================================================
+       PHOTO SCROLL ANIMATIONS
+    ========================================================= */
+
+    const photoCards =
+        document.querySelectorAll(".photo-card");
+
+
+    const photoObserver =
+        new IntersectionObserver(
+            (entries) => {
+
+                entries.forEach(entry => {
+
+                    if (entry.isIntersecting) {
+
+                        entry.target.classList.add(
+                            "visible"
+                        );
+
+                    }
+
+                });
+
+            },
+            {
+                threshold: 0.15
+            }
+        );
+
+
+    photoCards.forEach(card => {
+
+        photoObserver.observe(card);
+
+    });
+
+
+
+    /* =========================================================
+       ENVELOPE
+    ========================================================= */
+
+    const envelope =
+        document.getElementById("envelope");
+
+
+    envelope.addEventListener(
+        "click",
+        function() {
+
+            envelope.classList.toggle("open");
+
+        }
+    );
+
+
+
+    /* =========================================================
+       FINAL SECRET
+    ========================================================= */
+
+    const oneMore =
+        document.getElementById("oneMore");
+
+    const secret =
+        document.getElementById("secret");
+
+
+    oneMore.addEventListener(
+        "click",
+        function(event) {
+
+            secret.classList.add("show");
+
+            // Explode the hearts outward starting from wherever
+            // the button was on screen, rather than the middle
+            // of the page — feels more like it's coming FROM
+            // the button the person just tapped.
+            const buttonRect =
+                oneMore.getBoundingClientRect();
+
+            const originX =
+                buttonRect.left + buttonRect.width / 2;
+
+            const originY =
+                buttonRect.top + buttonRect.height / 2;
+
+            createHeartExplosion(originX, originY);
+
+            oneMore.textContent =
+                "♡";
+
+        }
+    );
+
+
+
+    /* =========================================================
+       HEART EXPLOSION
+       Fires a burst of little heart <span>s outward from a
+       single point (originX, originY — the center of whichever
+       button was clicked). Unlike before, each heart's flight is
+       animated directly with element.animate() (the Web
+       Animations API) instead of a shared CSS @keyframes rule —
+       that's what makes each heart's scale/opacity/position land
+       reliably in sync, which is what gives the "explosion" its
+       punch.
+    ========================================================= */
+
+    function createHeartExplosion(originX, originY) {
+
+        // Fall back to screen center if no origin was passed in.
+        const startX =
+            originX ?? window.innerWidth / 2;
+
+        const startY =
+            originY ?? window.innerHeight / 2;
+
+        // HOW MANY HEARTS in the burst.
+        const heartCount = 40;
+
+        for (
+            let i = 0;
+            i < heartCount;
+            i++
+        ) {
+
+            const heart =
+                document.createElement("span");
+
+            heart.className =
+                "burst-heart";
+
+            heart.textContent =
+                Math.random() > 0.5
+                    ? "♥"
+                    : "♡";
+
+            // Pin every heart to the exact same starting point
+            // (the button's center) — element.animate() below
+            // then carries each one out from there.
+            heart.style.left =
+                startX + "px";
+
+            heart.style.top =
+                startY + "px";
+
+            // HEART SIZE: this is the main fix — was topping out
+            // around 70px before, now roughly 46–104px so the
+            // explosion actually reads as big, chunky hearts.
+            // Adjust BASE / RANGE below to resize further.
+            const size =
+                46 + Math.random() * 58;
+
+            heart.style.fontSize =
+                size + "px";
+
+            document.body.appendChild(heart);
+
+            // Random direction + distance for this heart to fly to.
+            const angle =
+                Math.random() * Math.PI * 2;
+
+            const distance =
+                160 + Math.random() * 460;
+
+            const x =
+                Math.cos(angle) * distance;
+
+            const y =
+                Math.sin(angle) * distance;
+
+            // The actual animation: start tiny and right on the
+            // button, pop up bigger, then fly out to (x, y) while
+            // fading out. This runs on the element directly rather
+            // than through a CSS class, so there's no risk of
+            // animations overlapping or resetting mid-flight.
+            heart.animate(
+
+                [
+                    {
+                        transform:
+                            "translate(-50%, -50%) scale(0.3)",
+                        opacity: 1
+                    },
+                    {
+                        transform:
+                            "translate(-50%, -50%) scale(1.3)",
+                        opacity: 1,
+                        offset: 0.18
+                    },
+                    {
+                        transform:
+                            `translate(
+                                calc(-50% + ${x}px),
+                                calc(-50% + ${y}px)
+                            ) scale(1.05)`,
+                        opacity: 0
+                    }
+                ],
+
+                {
+                    duration: 1400,
+                    easing: "ease-out"
+                }
+
+            );
+
+            // Remove the heart once its flight is done.
+            setTimeout(() => {
+
+                heart.remove();
+
+            }, 1450);
+
+        }
+
+    }
+
+</script>
+
+</body>
+</html>
